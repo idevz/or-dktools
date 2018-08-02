@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+### BEGIN ###
+# Author: idevz
+# Since: 2018/03/12
+# Description:       Build and push WeiboMesh Docker image.
+#	User input a build type, program will do the building things:
+#	like:
+# ./bp.sh bt                             building testing docker image
+# ./bp.sh tti                            show image info  ./bp.sh tti
+# GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
+### END ###
+
+set -ex
+[ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
+
+DEFAULT_LOCAL_FILE_SERVER="172.17.0.1"
+LOCAL_FILE_SERVER=${LOCAL_FILE_SERVER=$DEFAULT_LOCAL_FILE_SERVER}
+
+NOTIC_PREFIX="\n - --- --- "
+NOTIC_SUFFIX=" --- --- -\n "
+
+xnotic() {
+	echo ${NOTIC_PREFIX}$1${NOTIC_SUFFIX}
+}
+
+kcopy() {
+	test ! -z $1 && SRC=$1
+	test ! -z $2 && DST=$2
+	test -z ${SRC} || test -z ${DST} && xnotic "empty file to copy or copy to." && exit 1
+	curl -fSL http://${LOCAL_FILE_SERVER}/${SRC} -o ${DST}
+	if [ ! -z $3 ] && [ "${3}" == "+x" ]; then
+		chmod +x ${DST}
+	fi
+}
+
+# yum-config-manager --add-repo http://mirrors.163.com/.help/CentOS7-Base-163.repo
+
+# [root@05f3817b6465 /]# stap -v -e 'probe vfs.read {printf("read performed\n"); exit()}'
+# Checking "/lib/modules/3.10.0-229.el7.x86_64/build/.config" failed with error: No such file or directory
+# yum install -y http://10.222.76.51/builds/pkgs/kernel-40/kernel-3.10.0-229.el7.x86_64.rpm
+# rpm -pql kernel-debuginfo-3.10.0-229.el7.x86_64.rpm
+
+# [root@05f3817b6465 modules]# stap -v -e 'probe vfs.read {printf("read performed\n"); exit()}'
+# Pass 1: parsed user script and 470 library scripts using 135260virt/40516res/3304shr/37412data kb, in 440usr/20sys/462real ms.
+# semantic error: while resolving probe point: identifier 'kernel' at /usr/share/systemtap/tapset/linux/vfs.stp:915:18
+#         source: probe vfs.read = kernel.function("vfs_read")
+#                                  ^
+
+# semantic error: missing x86_64 kernel/module debuginfo [man warning::debuginfo] under '/lib/modules/3.10.0-229.el7.x86_64/build'
+
+# semantic error: resolution failed in alias expansion builder
+
+# semantic error: while resolving probe point: identifier 'vfs' at <input>:1:7
+#         source: probe vfs.read {printf("read performed\n"); exit()}
+#                       ^
+
+# semantic error: no match
+
+# Pass 2: analyzed script: 0 probes, 0 functions, 0 embeds, 0 globals using 144108virt/49392res/5344shr/44160data kb, in 60usr/60sys/127real ms.
+# Missing separate debuginfos, use: debuginfo-install kernel-3.10.0-229.el7.x86_64
+# Pass 2: analysis failed.  [man error::pass2]

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+### BEGIN ###
+# Author: idevz
+# Since: 2018/03/12
+# Description:       Build and push WeiboMesh Docker image.
+#	User input a build type, program will do the building things:
+#	like:
+# ./bp.sh bt                             building testing docker image
+# ./bp.sh tti                            show image info  ./bp.sh tti
+# GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
+### END ###
+
+# KERNEL_URL=https://buildlogs.centos.org/c7.1708.00/kernel/20170822030048/3.10.0-693.el7.x86_64
+
+set -ex
+[ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
+
+[ -x ${BASE_DIR}/common/base ] && . ${BASE_DIR}/common/base
+[ ! -x ${BASE_DIR}/common/.kernel-url-conf ] && xnotic "must set KERNEL_URL_MAP" && exit 1
+. ${BASE_DIR}/common/.kernel-url-conf
+
+KERNEL_VERSION=$(uname -r)
+
+local_install_systemtap() {
+	# ./kernel-headers-${KERNEL_VERSION}.rpm \
+	# ./kernel-debug-devel-${KERNEL_VERSION}.rpm \
+	# ./kernel-tools-libs-${KERNEL_VERSION}.rpm \
+	[ $(uname -r) == ${KERNEL_VERSION} ] &&
+		yum -y remove kernel* &&
+		mkdir /tmp/kernel-rpms &&
+		cd /tmp/kernel-rpms &&
+		kcopy "pkgs/kernel-rpms/kernel-${KERNEL_VERSION}.rpm" kernel-${KERNEL_VERSION}.rpm &&
+		# kcopy "pkgs/kernel-rpms/kernel-headers-${KERNEL_VERSION}.rpm" kernel-headers-${KERNEL_VERSION}.rpm &&
+		kcopy "pkgs/kernel-rpms/kernel-devel-${KERNEL_VERSION}.rpm" kernel-devel-${KERNEL_VERSION}.rpm &&
+		# kcopy "pkgs/kernel-rpms/kernel-debug-devel-${KERNEL_VERSION}.rpm" kernel-debug-devel-${KERNEL_VERSION}.rpm &&
+		# kcopy "pkgs/kernel-rpms/kernel-tools-libs-${KERNEL_VERSION}.rpm" kernel-tools-libs-${KERNEL_VERSION}.rpm &&
+		# kcopy "pkgs/kernel-rpms/kernel-tools-${KERNEL_VERSION}.rpm" kernel-tools-${KERNEL_VERSION}.rpm &&
+		kcopy "pkgs/kernel-rpms/kernel-debuginfo-common-x86_64-${KERNEL_VERSION}.rpm" kernel-debuginfo-common-x86_64-${KERNEL_VERSION}.rpm &&
+		kcopy "pkgs/kernel-rpms/kernel-debuginfo-${KERNEL_VERSION}.rpm" kernel-debuginfo-${KERNEL_VERSION}.rpm &&
+		cd /tmp/kernel-rpms &&
+		yum --nogpgcheck -y localinstall ./kernel-${KERNEL_VERSION}.rpm \
+			./kernel-devel-${KERNEL_VERSION}.rpm \
+			./kernel-debuginfo-common-x86_64-${KERNEL_VERSION}.rpm \
+			./kernel-debuginfo-${KERNEL_VERSION}.rpm &&
+		yum --nogpgcheck -y install systemtap systemtap-runtime perl-devel &&
+		rm -rf /tmp/kernel-rpms
+}
+
+install_systemtap() {
+	KERNEL_URL_PREFIX=${KERNEL_URL_MAP["${KERNEL_VERSION}"]}
+	KERNEL_URL=${KERNEL_URL_PREFIX}/kernel-${KERNEL_VERSION}.rpm
+	KERNEL_DEVEL_URL=${KERNEL_URL_PREFIX}/kernel-devel-${KERNEL_VERSION}.rpm
+	KERNEL_DEBUG_INFO_COMMON_URL="http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-common-x86_64-${KERNEL_VERSION}.rpm"
+	KERNEL_DEBUG_INFO_URL="http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-${KERNEL_VERSION}.rpm"
+	[ ! -z ${KERNEL_URL_PREFIX} ] &&
+		# yum --nogpgcheck -y install perl-devel &&
+		yum -y remove kernel* &&
+		yum install --nogpgcheck -y ${KERNEL_URL} &&
+		yum install --nogpgcheck -y ${KERNEL_DEVEL_URL} &&
+		yum install --nogpgcheck -y ${KERNEL_DEBUG_INFO_COMMON_URL} &&
+		yum install --nogpgcheck -y ${KERNEL_DEBUG_INFO_URL} &&
+		yum --nogpgcheck -y install systemtap systemtap-runtime perl-devel
+}

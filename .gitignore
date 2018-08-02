@@ -1,0 +1,15 @@
+.DS_Store
+.vagrant/
+.buildpath
+.project
+.idea
+
+servroot*
+zj*
+
+# V
+logs/
+
+# luacov
+luacov.*
+/doc

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+### BEGIN ###
+# Author: idevz
+# Since: 2018/03/12
+# Description:       Build and push WeiboMesh Docker image.
+#	User input a build type, program will do the building things:
+#	like:
+# ./bp.sh bt                             building testing docker image
+# ./bp.sh tti                            show image info  ./bp.sh tti
+# GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
+### END ###
+
+# KERNEL_URL=https://buildlogs.centos.org/c7.1708.00/kernel/20170822030048/3.10.0-693.el7.x86_64
+
+set -ex
+[ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
+
+declare -A KERNEL_URL_MAP=(
+	["3.10.0-229.el7.x86_64"]='https://buildlogs.centos.org/c7.01.00/kernel/20150306113403/3.10.0-229.el7.x86_64'
+	["3.10.0-693.el7.x86_64"]='https://buildlogs.centos.org/c7.1708.00/kernel/20170822030048/3.10.0-693.el7.x86_64'
+)
