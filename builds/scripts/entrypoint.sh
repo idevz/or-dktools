@@ -13,4 +13,5 @@
 
 . /etc/profile
 set -ex
+
 exec "$@"

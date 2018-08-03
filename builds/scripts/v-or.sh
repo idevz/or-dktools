@@ -62,17 +62,20 @@ build_or_env() {
 build_or_env
 
 if [ "${OR_ENV}" == "debug" ]; then
-	echo "export PATH=$PATH:${DEBUG_OR_PREFIX}/luajit/bin/:${DEBUG_OR_PREFIX}/nginx/sbin/:${DEBUG_OR_PREFIX}/bin/" >>/etc/profile
+	export PATH=$PATH:${DEBUG_OR_PREFIX}/luajit/bin/:${DEBUG_OR_PREFIX}/nginx/sbin/:${DEBUG_OR_PREFIX}/bin/
+	echo "export PATH=$PATH" >>/etc/profile
 	[ ! -z ${DOCKER} ] &&
 		ln -sf /dev/stdout ${DEBUG_OR_PREFIX}/nginx/logs/access.log &&
 		ln -sf /dev/stderr ${DEBUG_OR_PREFIX}/nginx/logs/error.log
 elif [ "${OR_ENV}" == "valgrind" ]; then
-	echo "export PATH=$PATH:${VAL_OR_PREFIX}/luajit/bin/:${VAL_OR_PREFIX}/nginx/sbin/:${VAL_OR_PREFIX}/bin/:${DEFAULT_LUAJIT_PREFIX}/bin/" >>/etc/profile
+	export PATH=$PATH:${VAL_OR_PREFIX}/luajit/bin/:${VAL_OR_PREFIX}/nginx/sbin/:${VAL_OR_PREFIX}/bin/:${DEFAULT_LUAJIT_PREFIX}/bin/
+	echo "export PATH=$PATH" >>/etc/profile
 	[ ! -z ${DOCKER} ] &&
 		ln -sf /dev/stdout ${VAL_OR_PREFIX}/nginx/logs/access.log &&
 		ln -sf /dev/stderr ${VAL_OR_PREFIX}/nginx/logs/error.log
 else
-	echo "export PATH=$PATH:${OR_PREFIX}/luajit/bin/:${OR_PREFIX}/nginx/sbin/:${OR_PREFIX}/bin/" >>/etc/profile
+	export PATH=$PATH:${OR_PREFIX}/luajit/bin/:${OR_PREFIX}/nginx/sbin/:${OR_PREFIX}/bin/
+	echo "export PATH=$PATH" >>/etc/profile
 	[ ! -z ${DOCKER} ] &&
 		ln -sf /dev/stdout ${OR_PREFIX}/nginx/logs/access.log &&
 		ln -sf /dev/stderr ${OR_PREFIX}/nginx/logs/error.log
@@ -80,8 +83,8 @@ fi
 
 if [ "${OR_ENV}" == "debug" ] || [ "${OR_ENV}" == "valgrind" ]; then
 	luarocks install luacheck
-	yum install -y Python-devel gdb
-	debuginfo-install --nogpgcheck -y glibc-2.17-222.el7.x86_64 libgcc-4.8.5-28.el7_5.1.x86_64
+	yum install -y gdb Python-devel
+	debuginfo-install --nogpgcheck -y glibc libgcc
 	kcopy builds/run/luajit_prove /usr/local/bin/luajit_prove +x
 	kcopy builds/run/run /usr/local/bin/run +x
 fi
