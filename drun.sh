@@ -21,6 +21,7 @@ BUILDING_PATH=${BASE_DIR}/builds
 # using local package to install or not(currently signified to kernel packages)
 GFW=${GFW}
 OR_ENV=${OR_ENV}
+STAP=${STAP}
 RESTY_J=${RESTY_J:-1}
 
 # ./drun.sh build_stap
@@ -37,7 +38,7 @@ build_stap() {
 }
 
 # ./drun.sh build_or
-# RESTY_J=4 GFW=true OR_ENV=debug ./drun.sh build_or
+# GFW=true STAP=true RESTY_J=4 OR_ENV=debug ./drun.sh build_or
 build_or() {
 	TARG_NAME=zhoujing/or
 	[ ! -z $1 ] && TARG_NAME=$1

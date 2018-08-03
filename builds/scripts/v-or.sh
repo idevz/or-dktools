@@ -13,6 +13,7 @@
 
 # ENV GFW
 # ENV OR_ENV
+# ENV STAP
 # EVN DOCKER
 
 set -ex
@@ -45,7 +46,7 @@ build_or_env() {
 		local_pkg_preparing
 	fi
 
-	if [ "${OR_ENV}" == "debug" ] || [ "${OR_ENV}" == "valgrind" ]; then
+	if [ ! -z ${STAP} ] && [ "${OR_ENV}" == "debug" ] || [ "${OR_ENV}" == "valgrind" ]; then
 		[ -x ${BASE_DIR}/common/centos7-stap ] && . ${BASE_DIR}/common/centos7-stap
 		if [ -z ${GFW} ]; then
 			install_systemtap
@@ -85,6 +86,9 @@ if [ "${OR_ENV}" == "debug" ] || [ "${OR_ENV}" == "valgrind" ]; then
 	luarocks install luacheck
 	yum install -y gdb Python-devel
 	debuginfo-install --nogpgcheck -y glibc libgcc
-	kcopy builds/run/luajit_prove /usr/local/bin/luajit_prove +x
-	kcopy builds/run/run /usr/local/bin/run +x
+
+	cp ${BASE_DIR}/run/luajit_prove /usr/local/bin/luajit_prove &&
+		chmod +x /usr/local/bin/luajit_prove
+	cp ${BASE_DIR}/run/run /usr/local/bin/run &&
+		chmod +x /usr/local/bin/run
 fi

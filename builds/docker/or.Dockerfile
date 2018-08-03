@@ -10,6 +10,7 @@ LABEL RUN="docker run -it --privileged --name NAME IMAGE"
 ARG GFW 
 ARG OR_ENV 
 ARG DOCKER
+ARG STAP
 
 ARG CV
 ARG RESTY_VERSION
