@@ -119,7 +119,7 @@ or_for_debug() {
 	cd /tmp/openresty-${RESTY_VERSION} &&
 		./configure \
 			--prefix=${DEBUG_OR_PREFIX} \
-			-j${RESTY_J} ${_RESTY_CONFIG_DEPS} \
+			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
@@ -170,7 +170,7 @@ or_for_valgrind() {
 	cd /tmp/openresty-${RESTY_VERSION} &&
 		./configure \
 			--prefix=${VAL_OR_PREFIX} \
-			-j${RESTY_J} ${_RESTY_CONFIG_DEPS} \
+			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
