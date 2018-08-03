@@ -42,6 +42,7 @@ build_stap() {
 build_or() {
 	TARG_NAME=zhoujing/or
 	[ ! -z $1 ] && TARG_NAME=$1
+	[ ! -z ${OR_ENV} ] && TARG_NAME=${TARG_NAME}:${OR_ENV}
 	docker build \
 		--build-arg GFW=${GFW} \
 		--build-arg OR_ENV=${OR_ENV} \

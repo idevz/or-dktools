@@ -38,9 +38,6 @@ RESTY_J=${RESTY_J=$DEFAULT_RESTY_J}
 _RESTY_CONFIG_DEPS="--with-openssl=/tmp/openssl-${RESTY_OPENSSL_VERSION} --with-pcre=/tmp/pcre-${RESTY_PCRE_VERSION}"
 RESTY_CONFIG_OPTIONS_MORE=""
 
-yum install --nogpgcheck -y libxml2-devel libxslt-devel gd-devel geoip-devel \
-	gcc gcc-c++ automake autoconf libtool make zip unzip patch
-
 pkg_preparing() {
 	cd /tmp &&
 		curl -fSL https://www.openssl.org/source/openssl-${RESTY_OPENSSL_VERSION}.tar.gz -o openssl-${RESTY_OPENSSL_VERSION}.tar.gz &&

@@ -25,6 +25,9 @@ BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 [ -x ${BASE_DIR}/common/base ] && . ${BASE_DIR}/common/base
 [ -x ${BASE_DIR}/common/or-install ] && . ${BASE_DIR}/common/or-install
 
+yum install --nogpgcheck -y libxml2-devel libxslt-devel gd-devel geoip-devel \
+	gcc gcc-c++ g++ automake autoconf libtool make zip unzip patch
+
 install_or() {
 	if [ "${OR_ENV}" == "debug" ]; then
 		or_for_debug

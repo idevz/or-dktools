@@ -7,7 +7,17 @@ FROM centos:7
 LABEL maintainer="idevz <zhoujing00k@gmail.com>"
 LABEL RUN="docker run -it --privileged --name NAME IMAGE"
 
-ARG OR_ENV
+ARG GFW 
+ARG OR_ENV 
+ARG DOCKER
+
+ARG CV
+ARG RESTY_VERSION
+ARG RESTY_LUAROCKS_VERSION
+ARG RESTY_OPENSSL_VERSION
+ARG RESTY_PCRE_VERSION
+ARG RESTY_ZLIB_VERSION
+ARG RESTY_J
 
 COPY /scripts /tmp/scripts
 
