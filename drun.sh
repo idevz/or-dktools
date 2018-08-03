@@ -20,7 +20,9 @@ BUILDING_PATH=${BASE_DIR}/builds
 # because of the GFW and the weak network
 # using local package to install or not(currently signified to kernel packages)
 DEFAULT_GFW=
+DEFAULT_OR_ENV=
 GFW=${GFW=$DEFAULT_GFW}
+OR_ENV=${OR_ENV=$DEFAULT_OR_ENV}
 
 # ./drun.sh build_stap
 build_stap() {
@@ -33,6 +35,22 @@ build_stap() {
 		-f ${BUILDING_PATH}/docker/stap.Dockerfile \
 		${BUILDING_PATH}
 	exit 0
+}
+
+# ./drun.sh build_or
+# GFW=true OR_ENV=debug ./drun.sh build_or
+build_or() {
+	TARG_NAME=zhoujing/or
+	[ ! -z $1 ] && TARG_NAME=$1
+	docker build \
+		--build-arg GFW=${GFW} \
+		--build-arg OR_ENV=${OR_ENV} \
+		--build-arg DOCKER=true \
+		-t ${TARG_NAME} \
+		-f ${BUILDING_PATH}/docker/or.Dockerfile \
+		${BUILDING_PATH}
+	exit 0
+
 }
 
 start_fs() {

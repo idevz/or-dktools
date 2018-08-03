@@ -19,4 +19,5 @@ set -ex
 declare -A KERNEL_URL_MAP=(
 	["3.10.0-229.el7.x86_64"]='https://buildlogs.centos.org/c7.01.00/kernel/20150306113403/3.10.0-229.el7.x86_64'
 	["3.10.0-693.el7.x86_64"]='https://buildlogs.centos.org/c7.1708.00/kernel/20170822030048/3.10.0-693.el7.x86_64'
+	["3.10.0-862.3.2.el7.x86_64"]='http://mirror.centos.org/centos/7/updates/x86_64/Packages'
 )

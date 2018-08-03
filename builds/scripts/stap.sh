@@ -11,8 +11,9 @@
 # GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
 ### END ###
 
-set -ex
+# ENV GFW
 
+set -ex
 BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 
 [ -x ${BASE_DIR}/common/base ] && . ${BASE_DIR}/common/base
