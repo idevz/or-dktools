@@ -28,7 +28,8 @@ BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 
 yum install --nogpgcheck -y libxslt-devel gd-devel geoip-devel \
 	gcc gcc-c++ make unzip patch \
-	perl perl-ExtUtils-Embed
+	perl perl-ExtUtils-Embed \
+	which less
 
 install_or() {
 	if [ "${OR_ENV}" == "debug" ]; then
@@ -89,8 +90,8 @@ if [ "${OR_ENV}" == "debug" ] || [ "${OR_ENV}" == "valgrind" ]; then
 	yum install -y gdb Python-devel
 	debuginfo-install --nogpgcheck -y glibc libgcc
 
-	cp ${BASE_DIR}/run/luajit_prove /usr/local/bin/luajit_prove &&
-		chmod +x /usr/local/bin/luajit_prove
-	cp ${BASE_DIR}/run/run /usr/local/bin/run &&
-		chmod +x /usr/local/bin/run
+	for X_FILE in $(ls ${BASE_DIR}/run); do
+		cp ${BASE_DIR}/run/${X_FILE} /usr/local/bin/${X_FILE} &&
+			chmod +x /usr/local/bin/${X_FILE}
+	done
 fi
