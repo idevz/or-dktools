@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+### BEGIN ###
+# Author: idevz
+# Since: 2018/03/12
+# Description:       install systemtap.
+#	User input a build type, program will do the building things:
+#	like:
+# ./bp.sh bt                             building testing docker image
+# ./bp.sh tti                            show image info  ./bp.sh tti
+# GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
+### END ###
+
+set -ex
+[ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
+
+$(cat /etc/profile | grep 'export PATH=/')
+
+#TODO: change wget to curl for unify
+yum install -y wget
+
+WEIBO_MOTAN_OPENRESTY_VERSION=${WMOV:-"0.0.1"}
+MOTAN_OPENRESTY_VERSION=${MOV:-"0.0.1-rc.1"}
+INTERNAL_GITLAB_TOKEN=${IGLB}
+
+# IGLB="PRIVATE-TOKEN: kMT_Czwx_Y7NgtGosqGj"
+install_weibo_motan_openresty() {
+	curl -fSL -H "${INTERNAL_GITLAB_TOKEN}" "http://git.intra.weibo.com/openresty/weibo-motan/repository/v${WEIBO_MOTAN_OPENRESTY_VERSION}/archive.tar.gz" -o /tmp/weibo-motan.tar.gz &&
+		mkdir /tmp/tar_tmp &&
+		tar zxf /tmp/weibo-motan.tar.gz -C /tmp/tar_tmp &&
+		cd "/tmp/tar_tmp/$(ls /tmp/tar_tmp)" &&
+		"./install" &&
+		rm -rf /tmp/weibo-motan.tar.gz /tmp/tar_tmp*
+
+	# TODO: add this to motan-openresty stardard installation
+	OR=openresty
+	TMP=${BASE_DIR}/test_or_version_tmp
+	OR_ROOT=$(${OR} -V &>${TMP} && cat ${TMP} |
+		grep prefix | sed 's/.*prefix\=\(.*\)\/nginx.*/\1/g')
+	rm ${TMP}
+	SITE_LUALIB_ROOT=${OR_ROOT}/site/lualib
+	cd ${SITE_LUALIB_ROOT}/motan/libs &&
+		gcc -g -o libmotan_tools.so -fpic -shared motan_tools.c &&
+		[ ! -z libmotan_tools.so ] &&
+		LIB_MOTAN_TOOLS_SO_FILE=libmotan_tools.so &&
+		LIB_MOTAN_TOOLS_SO=/lib/libmotan_tools.so &&
+		ln -sf ${SITE_LUALIB_ROOT}/motan/libs/${LIB_MOTAN_TOOLS_SO_FILE} ${LIB_MOTAN_TOOLS_SO} &&
+		ldconfig
+}
+
+install_motan_openresty() {
+	curl -fSL "https://github.com/weibocom/motan-openresty/archive/v${MOTAN_OPENRESTY_VERSION}.tar.gz" -o /tmp/motan-openresty.tar.gz &&
+		tar zxf /tmp/motan-openresty.tar.gz &&
+		cd /motan-openresty-${MOTAN_OPENRESTY_VERSION}/ &&
+		./install &&
+		rm -rf /tmp/motan-openresty.tar.gz /motan-openresty*
+
+	# TODO: add this to motan-openresty stardard installation
+	OR=openresty
+	TMP=${BASE_DIR}/test_or_version_tmp
+	OR_ROOT=$(${OR} -V &>${TMP} && cat ${TMP} |
+		grep prefix | sed 's/.*prefix\=\(.*\)\/nginx.*/\1/g')
+	rm ${TMP}
+	SITE_LUALIB_ROOT=${OR_ROOT}/site/lualib
+	cd ${SITE_LUALIB_ROOT}/motan/libs &&
+		gcc -g -o libmotan_tools.so -fpic -shared motan_tools.c &&
+		[ ! -z libmotan_tools.so ] &&
+		LIB_MOTAN_TOOLS_SO_FILE=libmotan_tools.so &&
+		LIB_MOTAN_TOOLS_SO=/lib/libmotan_tools.so &&
+		ln -sf ${SITE_LUALIB_ROOT}/motan/libs/${LIB_MOTAN_TOOLS_SO_FILE} ${LIB_MOTAN_TOOLS_SO} &&
+		ldconfig
+}

@@ -26,8 +26,9 @@ BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 [ -x ${BASE_DIR}/common/base ] && . ${BASE_DIR}/common/base
 [ -x ${BASE_DIR}/common/or-install ] && . ${BASE_DIR}/common/or-install
 
-yum install --nogpgcheck -y libxml2-devel libxslt-devel gd-devel geoip-devel \
-	gcc gcc-c++ automake autoconf libtool make zip unzip patch
+yum install --nogpgcheck -y libxslt-devel gd-devel geoip-devel \
+	gcc gcc-c++ make unzip patch \
+	perl perl-ExtUtils-Embed
 
 install_or() {
 	if [ "${OR_ENV}" == "debug" ]; then
@@ -57,6 +58,7 @@ build_or_env() {
 
 	install_or
 	install_luarocks
+	install_test_nginx
 	pkg_clean
 }
 

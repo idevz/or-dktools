@@ -105,6 +105,7 @@ install_default_luajit() {
 }
 
 or_for_debug() {
+	yum install --nogpgcheck -y systemtap-sdt-devel
 	dev_preparing
 
 	cd /tmp/openresty-${RESTY_VERSION} &&
@@ -152,7 +153,7 @@ or_for_debug() {
 }
 
 or_for_valgrind() {
-	yum install -y valgrind-devel
+	yum install --nogpgcheck -y systemtap-sdt-devel valgrind-devel
 
 	dev_preparing
 
@@ -240,6 +241,16 @@ or_for_prd() {
 		make -j${RESTY_J} install
 }
 
+install_test_nginx() {
+	export LC_CTYPE=en_US.UTF-8
+	export LC_ALL=en_US.UTF-8
+	echo "export LC_CTYPE=en_US.UTF-8" >>/etc/profile
+	echo "export LC_ALL=en_US.UTF-8" >>/etc/profile
+	curl -fSL http://xrl.us/cpanm -o /usr/bin/cpanm && chmod +x /usr/bin/cpanm
+	cpanm --force Test::Nginx
+	cpanm --force Digest::SHA
+}
+
 install_luarocks() {
 	X_LUAJIT_PREFIX=${OR_PREFIX}/luajit
 	if [ "${OR_ENV}" == "debug" ]; then
@@ -275,4 +286,6 @@ pkg_clean() {
 			luarocks-${RESTY_LUAROCKS_VERSION}
 
 	yum autoremove -y
+	# yum remove -y make
+	yum clean all
 }
