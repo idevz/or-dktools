@@ -14,12 +14,9 @@
 set -ex
 [ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
 
-OR_PREFIX=/usr/local/openresty
-DEBUG_OR_PREFIX=/usr/local/openresty-debug
-VAL_OR_PREFIX=/usr/local/openresty-valgrind
+OR_PREFIX=${OR_PREFIX:-"/usr/local/openresty"}
 DEFAULT_LUAJIT_PREFIX=/usr/local/luajit
 
-CENTOS_IMAGE=centos:${CV:-7}
 RESTY_VERSION=${RESTY_VERSION:-"1.13.6.2"}
 RESTY_LUAROCKS_VERSION=${RESTY_LUAROCKS_VERSION:-"2.4.3"}
 RESTY_OPENSSL_VERSION=${RESTY_OPENSSL_VERSION:-"1.0.2k"}
@@ -60,14 +57,14 @@ local_pkg_preparing() {
 }
 
 dev_preparing() {
-	ZLIB_PREFIX=${DEBUG_OR_PREFIX}/zlib
+	ZLIB_PREFIX=${OR_PREFIX}/zlib
 	cd /tmp/zlib-${RESTY_ZLIB_VERSION} &&
 		./configure --prefix=${ZLIB_PREFIX} &&
 		make CFLAGS='-O3 -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -g' \
 			SFLAGS='-O3 -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -g' &&
 		make install
 
-	OPENSSL_PREFIX=${DEBUG_OR_PREFIX}/openssl
+	OPENSSL_PREFIX=${OR_PREFIX}/openssl
 	cd /tmp/openssl-${RESTY_OPENSSL_VERSION} &&
 		./config \
 			no-threads no-asm \
@@ -82,7 +79,7 @@ dev_preparing() {
 		make &&
 		make install_sw
 
-	PCRE_PREFIX=${DEBUG_OR_PREFIX}/pcre
+	PCRE_PREFIX=${OR_PREFIX}/pcre
 	cd /tmp/pcre-${RESTY_PCRE_VERSION} &&
 		./configure \
 			--prefix=${PCRE_PREFIX} \
@@ -110,12 +107,12 @@ or_for_debug() {
 
 	cd /tmp/openresty-${RESTY_VERSION} &&
 		./configure \
-			--prefix=${DEBUG_OR_PREFIX} \
+			--prefix=${OR_PREFIX} \
 			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
+			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib:-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
 			--with-pcre-jit \
 			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -O0' \
 			--with-dtrace-probes \
@@ -161,12 +158,12 @@ or_for_valgrind() {
 
 	cd /tmp/openresty-${RESTY_VERSION} &&
 		./configure \
-			--prefix=${VAL_OR_PREFIX} \
+			--prefix=${OR_PREFIX} \
 			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
+			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib:-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
 			--with-pcre-jit \
 			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -O0' \
 			--with-dtrace-probes \
@@ -208,6 +205,7 @@ or_for_prd() {
 		./configure \
 			--prefix=${OR_PREFIX} \
 			-j${RESTY_J} ${_RESTY_CONFIG_DEPS} \
+			--with-ld-opt="-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
 			--with-file-aio \
 			--with-http_addition_module \
 			--with-http_auth_request_module \
@@ -253,9 +251,7 @@ install_test_nginx() {
 
 install_luarocks() {
 	X_LUAJIT_PREFIX=${OR_PREFIX}/luajit
-	if [ "${OR_ENV}" == "debug" ]; then
-		X_LUAJIT_PREFIX=${DEBUG_OR_PREFIX}/luajit
-	elif [ "${OR_ENV}" == "valgrind" ]; then
+	if [ "${OR_ENV}" == "valgrind" ]; then
 		X_LUAJIT_PREFIX=${DEFAULT_LUAJIT_PREFIX}
 	fi
 	cd /tmp/luarocks-${RESTY_LUAROCKS_VERSION} &&
@@ -286,6 +282,5 @@ pkg_clean() {
 			luarocks-${RESTY_LUAROCKS_VERSION}
 
 	yum autoremove -y
-	# yum remove -y make
 	yum clean all
 }

@@ -11,8 +11,10 @@
 # GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
 ### END ###
 
+OR_PREFIX=${OR_PREFIX:-"/usr/local/openresty"}
+
 if [ ! -z ${VALGRIND} ]; then
 	export TEST_NGINX_USE_VALGRIND=1
 fi
 
-exec /usr/local/openresty/bin/openresty -g "daemon off;"
+exec ${OR_PREFIX}/bin/openresty -g "daemon off;"

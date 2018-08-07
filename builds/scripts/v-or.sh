@@ -23,6 +23,8 @@ BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 	cp ${BASE_DIR}/entrypoint.sh /entrypoint.sh &&
 	chmod +x /entrypoint.sh
 
+OR_PREFIX=${OR_PREFIX:-"/usr/local/openresty"}
+
 [ -x ${BASE_DIR}/common/base ] && . ${BASE_DIR}/common/base
 [ -x ${BASE_DIR}/common/or-install ] && . ${BASE_DIR}/common/or-install
 
@@ -65,13 +67,7 @@ build_or_env() {
 
 build_or_env
 
-if [ "${OR_ENV}" == "debug" ]; then
-	export PATH=$PATH:${DEBUG_OR_PREFIX}/luajit/bin/:${DEBUG_OR_PREFIX}/nginx/sbin/:${DEBUG_OR_PREFIX}/bin/
-	echo "export PATH=$PATH" >>/etc/profile
-	[ ! -z ${DOCKER} ] &&
-		ln -sf /dev/stdout ${DEBUG_OR_PREFIX}/nginx/logs/access.log &&
-		ln -sf /dev/stderr ${DEBUG_OR_PREFIX}/nginx/logs/error.log
-elif [ "${OR_ENV}" == "valgrind" ]; then
+if [ "${OR_ENV}" == "valgrind" ]; then
 	export PATH=$PATH:${VAL_OR_PREFIX}/luajit/bin/:${VAL_OR_PREFIX}/nginx/sbin/:${VAL_OR_PREFIX}/bin/:${DEFAULT_LUAJIT_PREFIX}/bin/
 	echo "export PATH=$PATH" >>/etc/profile
 	[ ! -z ${DOCKER} ] &&

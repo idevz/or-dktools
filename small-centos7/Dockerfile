@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:7
 
 RUN rpm -e --nodeps systemd \
     && yum remove -y  \

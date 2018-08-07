@@ -16,11 +16,8 @@ set -ex
 
 $(cat /etc/profile | grep 'export PATH=/')
 
-#TODO: change wget to curl for unify
-yum install -y wget
-
 WEIBO_MOTAN_OPENRESTY_VERSION=${WMOV:-"0.0.1"}
-MOTAN_OPENRESTY_VERSION=${MOV:-"0.0.1-rc.1"}
+MOTAN_OPENRESTY_VERSION=${MOV:-"0.0.1-rc.2"}
 INTERNAL_GITLAB_TOKEN=${IGLB}
 
 # IGLB="PRIVATE-TOKEN: kMT_Czwx_Y7NgtGosqGj"
@@ -31,21 +28,6 @@ install_weibo_motan_openresty() {
 		cd "/tmp/tar_tmp/$(ls /tmp/tar_tmp)" &&
 		"./install" &&
 		rm -rf /tmp/weibo-motan.tar.gz /tmp/tar_tmp*
-
-	# TODO: add this to motan-openresty stardard installation
-	OR=openresty
-	TMP=${BASE_DIR}/test_or_version_tmp
-	OR_ROOT=$(${OR} -V &>${TMP} && cat ${TMP} |
-		grep prefix | sed 's/.*prefix\=\(.*\)\/nginx.*/\1/g')
-	rm ${TMP}
-	SITE_LUALIB_ROOT=${OR_ROOT}/site/lualib
-	cd ${SITE_LUALIB_ROOT}/motan/libs &&
-		gcc -g -o libmotan_tools.so -fpic -shared motan_tools.c &&
-		[ ! -z libmotan_tools.so ] &&
-		LIB_MOTAN_TOOLS_SO_FILE=libmotan_tools.so &&
-		LIB_MOTAN_TOOLS_SO=/lib/libmotan_tools.so &&
-		ln -sf ${SITE_LUALIB_ROOT}/motan/libs/${LIB_MOTAN_TOOLS_SO_FILE} ${LIB_MOTAN_TOOLS_SO} &&
-		ldconfig
 }
 
 install_motan_openresty() {
@@ -54,19 +36,4 @@ install_motan_openresty() {
 		cd /motan-openresty-${MOTAN_OPENRESTY_VERSION}/ &&
 		./install &&
 		rm -rf /tmp/motan-openresty.tar.gz /motan-openresty*
-
-	# TODO: add this to motan-openresty stardard installation
-	OR=openresty
-	TMP=${BASE_DIR}/test_or_version_tmp
-	OR_ROOT=$(${OR} -V &>${TMP} && cat ${TMP} |
-		grep prefix | sed 's/.*prefix\=\(.*\)\/nginx.*/\1/g')
-	rm ${TMP}
-	SITE_LUALIB_ROOT=${OR_ROOT}/site/lualib
-	cd ${SITE_LUALIB_ROOT}/motan/libs &&
-		gcc -g -o libmotan_tools.so -fpic -shared motan_tools.c &&
-		[ ! -z libmotan_tools.so ] &&
-		LIB_MOTAN_TOOLS_SO_FILE=libmotan_tools.so &&
-		LIB_MOTAN_TOOLS_SO=/lib/libmotan_tools.so &&
-		ln -sf ${SITE_LUALIB_ROOT}/motan/libs/${LIB_MOTAN_TOOLS_SO_FILE} ${LIB_MOTAN_TOOLS_SO} &&
-		ldconfig
 }

@@ -1,0 +1,53 @@
+        -Wl,-rpath=$$ORIGIN/xlib -ldl -lpthread -lcrypt -lpcre -lz \
+         0x000000000000000f (RPATH)              Library rpath: [/xlib]
+
+
+
+
+                 -Wl,-rpath=$ORIGIN/../xlib -ldl -lpthread -lcrypt -lpcre -lz \
+                  0x000000000000000f (RPATH)              Library rpath: [RIGIN/../xlib]
+
+
+
+--with-ld-opt="-Wl,-rpath='\$\$ORIGIN/../xlib'"
+0x000000000000000f (RPATH)              Library rpath: [$ORIGIN/../xlib]
+
+
+
+
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\$\\$\\$\\$\\$ORIGIN/lib'" -j4                                                               z@master1
+-rpath=$$$$/lib
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\$\\\$$ORIGIN/lib'" -j4                                                                     z@master1
+-Wl,-rpath=$$/lib
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\\$\\\\$ORIGIN/lib'" -j4
+-rpath=\$\/lib
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\$\\$\\$\\$$ORIGIN/lib'" -j4
+-Wl,-rpath=$$$1438ORIGIN/lib 
+
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\$\\\$ORIGIN/lib'" -j4     
+-rpath=$$ORIGIN/lib
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\$\\\$\\\$ORIGIN/lib'" -j4     
+-Wl,-rpath=$$$ORIGIN/lib
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\$\\\$\\\$\\\$ORIGIN/lib'" -j4 
+-Wl,-rpath=$$$$ORIGIN/lib
+ 0x000000000000000f (RPATH)              Library rpath: [/usr/local/openresty-del/luajit/lib:7494ORIGIN/lib]
+
+
+./configure --prefix=/usr/local/openresty-del --with-ld-opt="-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" -j4
+-Wl,-rpath='$$ORIGIN/lib' 
+ 0x000000000000000f (RPATH)              Library rpath: [/usr/local/openresty-del/luajit/lib:$ORIGIN/lib]
+
+
+
