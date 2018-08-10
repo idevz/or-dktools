@@ -24,6 +24,7 @@ BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
 
 if [ "${OPEN}" == "not" ]; then
 	install_weibo_motan_openresty
+	install_v
 else
 	install_motan_openresty
 fi

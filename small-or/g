@@ -51,3 +51,6 @@
 
 
 
+--with-ld-opt='-Wl,-rpath,/usr/local/openresty/luajit/lib -Wl,-rpath='\'\$\$ORIGIN/lib\'''
+
+--with-ld-opt='-Wl,-rpath,/usr/local/openresty/luajit/lib -Wl,-rpath='\'\$\$ORIGIN/lib\'''

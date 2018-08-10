@@ -31,7 +31,7 @@ OR_PREFIX=${OR_PREFIX:-"/usr/local/openresty"}
 yum install --nogpgcheck -y libxslt-devel gd-devel geoip-devel \
 	gcc gcc-c++ make unzip patch \
 	perl perl-ExtUtils-Embed \
-	which less
+	which less strace
 
 install_or() {
 	if [ "${OR_ENV}" == "debug" ]; then

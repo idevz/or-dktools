@@ -35,7 +35,9 @@ pkg_preparing() {
 		curl -fSL https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz -o openresty-${RESTY_VERSION}.tar.gz &&
 		tar xzf openresty-${RESTY_VERSION}.tar.gz &&
 		curl -fSL https://github.com/luarocks/luarocks/archive/${RESTY_LUAROCKS_VERSION}.tar.gz -o luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz &&
-		tar xzf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz
+		tar xzf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz &&
+		curl -fSL https://zlib.net/zlib-${RESTY_ZLIB_VERSION}.tar.gz -o zlib-${RESTY_ZLIB_VERSION}.tar.gz &&
+		tar xzf zlib-${RESTY_ZLIB_VERSION}.tar.gz
 }
 
 # RUN curl http://foo.com/package.tar.bz2 \
@@ -112,7 +114,7 @@ or_for_debug() {
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib:-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
+			--with-ld-opt=-Wl,-rpath="'""\\'"'\$\$ORIGIN/lib'"\\'""'"" -L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib" \
 			--with-pcre-jit \
 			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -O0' \
 			--with-dtrace-probes \
@@ -144,9 +146,14 @@ or_for_debug() {
 			--with-stream \
 			--with-stream_ssl_module \
 			--with-threads \
+			--user=root --group=root \
 			${RESTY_CONFIG_OPTIONS_MORE} &&
 		make -j${RESTY_J} &&
-		make -j${RESTY_J} install
+		make -j${RESTY_J} install &&
+		mkdir -p ${OR_PREFIX}/nginx/sbin/lib &&
+		for DEP_F in $(ldd ${OR_PREFIX}/nginx/sbin/nginx | grep -Eo '(\/.*) |(/lib64/.*) '); do
+			cp ${DEP_F} ${OR_PREFIX}/nginx/sbin/lib/$(basename ${DEP_F})
+		done
 }
 
 or_for_valgrind() {
@@ -163,7 +170,7 @@ or_for_valgrind() {
 			--with-debug \
 			--with-no-pool-patch \
 			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib:-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
+			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
 			--with-pcre-jit \
 			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -O0' \
 			--with-dtrace-probes \
@@ -201,11 +208,12 @@ or_for_valgrind() {
 }
 
 or_for_prd() {
+	# --with-ld-opt="-Wl,-rpath='\\'\\\$\\\$ORIGIN/lib\\''"
 	cd /tmp/openresty-${RESTY_VERSION} &&
 		./configure \
 			--prefix=${OR_PREFIX} \
 			-j${RESTY_J} ${_RESTY_CONFIG_DEPS} \
-			--with-ld-opt="-Wl,-rpath='\\\'\\\$\\\$ORIGIN/lib\\\''" \
+			--with-ld-opt=-Wl,-rpath="'""\\'"'\$\$ORIGIN/lib'"\\'""'" \
 			--with-file-aio \
 			--with-http_addition_module \
 			--with-http_auth_request_module \
@@ -234,11 +242,25 @@ or_for_prd() {
 			--with-stream \
 			--with-stream_ssl_module \
 			--with-threads \
+			--user=root --group=root \
 			${RESTY_CONFIG_OPTIONS_MORE} &&
 		make -j${RESTY_J} &&
-		make -j${RESTY_J} install
+		make -j${RESTY_J} install &&
+		mkdir -p ${OR_PREFIX}/nginx/sbin/lib &&
+		for DEP_F in $(ldd ${OR_PREFIX}/nginx/sbin/nginx | grep -Eo '(\/.*) |(/lib64/.*) '); do
+			cp ${DEP_F} ${OR_PREFIX}/nginx/sbin/lib/$(basename ${DEP_F})
+		done
 }
 
+install_weighttp() {
+	# 4 yum install -y gcc make libev-devel expect
+	# 19 tar zxf weighttp.tar.gz
+	# 20 cd weighttp-master/
+	# 21 ./waf configure
+	# 22 ./waf build
+	# 23 ./waf install
+	# 45 yum install expect -y
+}
 install_test_nginx() {
 	export LC_CTYPE=en_US.UTF-8
 	export LC_ALL=en_US.UTF-8
