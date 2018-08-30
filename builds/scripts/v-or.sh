@@ -3,12 +3,12 @@
 ### BEGIN ###
 # Author: idevz
 # Since: 2018/03/12
-# Description:       Build and push WeiboMesh Docker image.
-#	User input a build type, program will do the building things:
+# Description:       Build openresty for many env like debug, production, valgrind.
+#	User input a args through env params:
 #	like:
-# ./bp.sh bt                             building testing docker image
-# ./bp.sh tti                            show image info  ./bp.sh tti
-# GOLANG_VERSION=1.9 ./bp.sh bt         build both rpm and docker images with golang 1.9(default)"
+#   OR_PREFIX=/usr/local/openresty RESTY_J=4 ./v-or.sh
+#   OR_PREFIX=/usr/local/openresty-debug OR_ENV=debug RESTY_J=4 ./v-or.sh
+#   OR_PREFIX=/usr/local/openresty-valgrind OR_ENV=valgrind RESTY_J=4 ./v-or.sh
 ### END ###
 
 # ENV GFW
@@ -18,6 +18,7 @@
 
 set -ex
 BASE_DIR=$(dirname $(cd $(dirname "$0") && pwd -P)/$(basename "$0"))
+DEFAULT_LUAJIT_PREFIX=/usr/local/luajit
 
 [ ! -z ${DOCKER} ] &&
 	cp ${BASE_DIR}/entrypoint.sh /entrypoint.sh &&
@@ -68,11 +69,11 @@ build_or_env() {
 build_or_env
 
 if [ "${OR_ENV}" == "valgrind" ]; then
-	export PATH=$PATH:${VAL_OR_PREFIX}/luajit/bin/:${VAL_OR_PREFIX}/nginx/sbin/:${VAL_OR_PREFIX}/bin/:${DEFAULT_LUAJIT_PREFIX}/bin/
+	export PATH=$PATH:${OR_PREFIX}/luajit/bin/:${OR_PREFIX}/nginx/sbin/:${OR_PREFIX}/bin/:${DEFAULT_LUAJIT_PREFIX}/bin/
 	echo "export PATH=$PATH" >>/etc/profile
 	[ ! -z ${DOCKER} ] &&
-		ln -sf /dev/stdout ${VAL_OR_PREFIX}/nginx/logs/access.log &&
-		ln -sf /dev/stderr ${VAL_OR_PREFIX}/nginx/logs/error.log
+		ln -sf /dev/stdout ${OR_PREFIX}/nginx/logs/access.log &&
+		ln -sf /dev/stderr ${OR_PREFIX}/nginx/logs/error.log
 else
 	export PATH=$PATH:${OR_PREFIX}/luajit/bin/:${OR_PREFIX}/nginx/sbin/:${OR_PREFIX}/bin/
 	echo "export PATH=$PATH" >>/etc/profile

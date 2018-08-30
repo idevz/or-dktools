@@ -16,6 +16,7 @@ set -ex
 
 OR_PREFIX=${OR_PREFIX:-"/usr/local/openresty"}
 DEFAULT_LUAJIT_PREFIX=/usr/local/luajit
+DEFAULT_LUAJIT_VERSION=${DEFAULT_LUAJIT_VERSION:-"2.1.0-beta3"}
 
 RESTY_VERSION=${RESTY_VERSION:-"1.13.6.2"}
 RESTY_LUAROCKS_VERSION=${RESTY_LUAROCKS_VERSION:-"2.4.3"}
@@ -113,10 +114,10 @@ or_for_debug() {
 			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
-			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt=-Wl,-rpath="'""\\'"'\$\$ORIGIN/lib'"\\'""'"" -L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib" \
+			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -g -O0" \
+			--with-ld-opt=-Wl,-rpath="'""\\'"'\$\$ORIGIN/lib'"\\'""'"" -L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
 			--with-pcre-jit \
-			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -O0' \
+			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -g -O0' \
 			--with-dtrace-probes \
 			--with-poll_module \
 			--with-file-aio \
@@ -169,10 +170,10 @@ or_for_valgrind() {
 			-j${RESTY_J} \
 			--with-debug \
 			--with-no-pool-patch \
-			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -O0" \
-			--with-ld-opt="-L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
+			--with-cc-opt="-I${ZLIB_PREFIX}/include -I${PCRE_PREFIX}/include -I${OPENSSL_PREFIX}/include -g -O0" \
+			--with-ld-opt=-Wl,-rpath="'""\\'"'\$\$ORIGIN/lib'"\\'""'"" -L${ZLIB_PREFIX}/lib -L${PCRE_PREFIX}/lib -L${OPENSSL_PREFIX}/lib -Wl,-rpath,${ZLIB_PREFIX}/lib:${PCRE_PREFIX}/lib:${OPENSSL_PREFIX}/lib" \
 			--with-pcre-jit \
-			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -O0' \
+			--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -g -O0' \
 			--with-dtrace-probes \
 			--with-poll_module \
 			--with-file-aio \
@@ -253,14 +254,17 @@ or_for_prd() {
 }
 
 install_weighttp() {
-	# 4 yum install -y gcc make libev-devel expect
-	# 19 tar zxf weighttp.tar.gz
-	# 20 cd weighttp-master/
-	# 21 ./waf configure
-	# 22 ./waf build
-	# 23 ./waf install
-	# 45 yum install expect -y
+	yum install --nogpgcheck -y gcc make libev-devel expect
+	cd /tmp &&
+		curl -fSL http://cgit.lighttpd.net/weighttp.git/snapshot/weighttp-master.tar.gz -o weighttp-master.tar.gz &&
+		tar xzf weighttp-master.tar.gz &&
+		cd weighttp-master/ &&
+		./waf configure &&
+		./waf build &&
+		./waf install &&
+		cd -
 }
+
 install_test_nginx() {
 	export LC_CTYPE=en_US.UTF-8
 	export LC_ALL=en_US.UTF-8
@@ -269,6 +273,7 @@ install_test_nginx() {
 	curl -fSL http://xrl.us/cpanm -o /usr/bin/cpanm && chmod +x /usr/bin/cpanm
 	cpanm --force Test::Nginx
 	cpanm --force Digest::SHA
+	install_weighttp
 }
 
 install_luarocks() {
@@ -295,7 +300,8 @@ pkg_clean() {
 				pcre-${RESTY_PCRE_VERSION}
 	fi
 
-	cd /tmp &&
+	[ ! -z ${DOCKER} ] &&
+		cd /tmp &&
 		rm -rf \
 			openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
 			openresty-${RESTY_VERSION}.tar.gz \

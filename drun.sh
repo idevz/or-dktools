@@ -24,6 +24,7 @@ OPEN=${OPEN}     # open motan or not
 IGLB=${IGLB}     # internal_gitlab_token
 OR_ENV=${OR_ENV} # debug, valgrind
 OR_PREFIX=/usr/local/openresty
+MOTAN_OPENRESTY_VERSION=${MOTAN_OPENRESTY_VERSION}
 if [ ! -z ${OR_ENV} ]; then
 	OR_PREFIX=${OR_PREFIX}-${OR_ENV}
 fi
@@ -65,8 +66,8 @@ build_or() {
 }
 
 # OR_BASE_IMGE=zhoujing/openresty OR_ENV=debug ./drun.sh build_motan
-# IGLB="PRIVATE-TOKEN: kMT_Czwx_Y7NgtGosqGj" OPEN=not ./drun.sh build_motan
-# IGLB="PRIVATE-TOKEN: kMT_Czwx_Y7NgtGosqGj" OPEN=not OR_BASE_IMGE=zhoujing/openresty OR_ENV=debug ./drun.sh build_motan
+# IGLB="PRIVATE-TOKEN: YOUR TOKEN" OPEN=not ./drun.sh build_motan
+# IGLB="PRIVATE-TOKEN: YOUR TOKEN" OPEN=not OR_BASE_IMGE=zhoujing/openresty MOTAN_OPENRESTY_VERSION=0.0.1-rc.3 OR_ENV=debug ./drun.sh build_motan
 build_motan() {
 	TARG_NAME=zhoujing/or-motan
 	[ "${OPEN}" == "not" ] && [ -z ${IGLB} ] && echo "must set a internal gitlab token for internal weito motan openresty installation." && exit 1
@@ -81,6 +82,7 @@ build_motan() {
 		--build-arg OR_ENV=${OR_ENV} \
 		--build-arg OR_PREFIX=${OR_PREFIX} \
 		--build-arg OR_BASE_IMGE=${OR_BASE_IMGE} \
+		--build-arg MOTAN_OPENRESTY_VERSION=${MOTAN_OPENRESTY_VERSION} \
 		-t ${TARG_NAME} \
 		-f ${BUILDING_PATH}/docker/or-motan.Dockerfile \
 		${BUILDING_PATH}
