@@ -10,6 +10,8 @@ ARG IGLB
 
 ENV OR_ENV=${OR_ENV}
 ENV OR_PREFIX=${OR_PREFIX}
+ENV MOTAN_OPENRESTY_VERSION=${MOTAN_OPENRESTY_VERSION}
+
 # ---------------- #
 #     Building     #
 # ---------------- #

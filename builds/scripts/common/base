@@ -14,7 +14,7 @@
 set -ex
 [ -z ${BASE_DIR} ] && echo "This script can not run independently ." && exit 1
 
-DEFAULT_LOCAL_FILE_SERVER="172.17.0.1"
+DEFAULT_LOCAL_FILE_SERVER="127.0.0.1"
 LOCAL_FILE_SERVER=${LOCAL_FILE_SERVER=$DEFAULT_LOCAL_FILE_SERVER}
 
 NOTIC_PREFIX="\n - --- --- "

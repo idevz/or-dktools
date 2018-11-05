@@ -1,6 +1,8 @@
 FROM centos:7
 
-RUN rpm -e --nodeps systemd \
+RUN yum install -y sudo make gcc nmon tree tcpdump\
+    psmisc zsh git net-tools which;\
+    rpm -e --nodeps systemd \
     && yum remove -y  \
     dracut* \
     # passwd* iputils* hostname* rootfiles* \
@@ -9,7 +11,8 @@ RUN rpm -e --nodeps systemd \
     kmod-libs* device-mapper* \
     python-gobject-base* qrencode-libs* vim-minimal* \
     && yum autoremove -y \
-    && yum clean all 
+    && yum clean all ;
+
 
 FROM scratch
 COPY --from=0 / /
